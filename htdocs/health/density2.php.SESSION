@@ -1,0 +1,300 @@
+<?
+error_reporting(E_ALL);
+ini_set("display_errors",1);
+require('System/session.php');
+?>
+	<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+		<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Universal Design Interface</title>
+	<link href="css/bootstrap.css" rel="stylesheet">
+	<link href="css/bootstrap-combobox.css" rel="stylesheet">
+	<link href="css/datepicker.css" rel="stylesheet">
+	<link href="css/examples.css" rel="stylesheet" type="text/css">
+	<script src="js/jquery-1.11.0.min.js"></script>
+	<script language="javascript" type="text/javascript" src="js/jquery.flot.min.js"></script>
+	<script language="javascript" type="text/javascript" src="js/jquery.flot.time.js"></script>
+	<script language="javascript" type="text/javascript" src="js/jquery.flot.selection.min.js"></script>
+	<script language="javascript" type="text/javascript" src="js/jquery.flot.rangeselection.js"></script>
+	<script language="javascript" type="text/javascript" src="js/jquery.flot.image.js"></script>
+	 <script src="js/bootstrap.js"></script>
+	
+	 <script language="javascript" type="text/javascript">
+	 $(document).ready(function(){
+	 
+	 
+	//var currmin = <?echo strtotime($_SESSION['end_date']." - 6 months")*1000?>;
+	//var currmax  = <?echo strtotime($_SESSION['end_date'])*1000?>;
+	//var startdate = <?echo strtotime($_SESSION['end_date']." - 18 months")*1000?>;
+	//var enddate = <?echo strtotime($_SESSION['end_date'])*1000?>;
+	var currmin = <?echo strtotime($_GET['end_date']." - 6 months")*1000?>;
+	var currmax  = <?echo strtotime($_GET['end_date'])*1000?>;
+	var startdate = <?echo strtotime($_GET['end_date']." - 18 months")*1000?>;
+	var enddate = <?echo strtotime($_GET['end_date'])*1000?>;
+	var densityplot;
+	var bathroomplot;
+	var hydroplot;
+	var rangeselectionCallback = function(o){
+		var xaxisD = densityplot.getAxes().xaxis;
+		var xaxisB = bathroomplot.getAxes().xaxis;
+		var xaxisH = hydroplot.getAxes().xaxis;
+		
+        currmin = o.start;
+		currmax = o.end;
+	
+        xaxisD.options.min = currmin;
+        xaxisD.options.max = currmax;
+		densityplot.setupGrid();
+        densityplot.draw();
+		
+	    xaxisB.options.min = currmin;
+        xaxisB.options.max = currmax;
+		bathroomplot.setupGrid();
+        bathroomplot.draw();
+		
+	    xaxisH.options.min = currmin;
+        xaxisH.options.max = currmax;
+        hydroplot.setupGrid();
+        hydroplot.draw();
+   };
+   
+   
+
+   	function showTooltip(x, y, contents) {
+				//alert(contents);
+                    $("<div id='tooltip'>" + contents + "</div>").css({
+                        position: "absolute",
+                        display: "none",
+                        top: y + 5,
+                        left: x + 5,
+                        border: "1px solid #fdd",
+                        padding: "2px",
+                        "background-color": "#fee",
+                        opacity: 0.80
+                    }).appendTo("body").fadeIn(200);
+                }
+   
+	    var data = [[["image.php?what=Density", startdate, -24, enddate, 0]]];
+        var data2 = [[["image.php?what=Bathroom", startdate, -24, enddate, 0]]];
+	    var data3 = [[["image.php?what=Bedtime(Hydraulic)", startdate, -24, enddate, 0]]];
+	    var options= {
+			series: {
+				images: {
+					show: true
+				}
+			},
+			xaxis: {
+				mode: 'time',
+				min: currmin,
+				max: currmax,
+				minTickSize: [1,"day"]
+			},
+			yaxis: {
+				min: -24,
+				max: 0
+			},
+			grid: {
+                        hoverable: true,
+						clickable:true,
+			}
+		};
+
+		var options1= {
+			series: {
+				images: {
+					show: true
+				}
+			},
+			xaxis: {
+				mode:'time',
+				min: startdate,
+				max: enddate,
+				minTickSize:[1, "day"]
+			},
+			yaxis: {
+				min: 0,
+				max: 24
+			},
+			 rangeselection:{
+                   // color: pcolors[4], 
+                    start: currmin,
+                    end: currmax,
+                    enabled: true,
+                    callback: rangeselectionCallback
+                }
+		};
+		
+		$.plot.image.loadDataImages(data, options, function () {
+			densityplot = $.plot("#placeholder", data, options);
+		});
+		
+		$.plot.image.loadDataImages(data2, options, function () {
+			bathroomplot = $.plot("#placeholder2", data2, options);
+		});
+		
+		$.plot.image.loadDataImages(data3, options, function () {
+			hydroplot = $.plot("#placeholder3", data3, options);
+		});
+		
+			$.plot.image.loadDataImages(data, options1, function () {
+			$.plot("#overview", data, options1);
+		});
+		
+		$("#placeholder").bind("plothover", function (event, pos, item) {   
+		if(pos){
+                            $("#tooltip").remove();											
+                           var x = Math.floor(pos.x.toFixed(2));
+							var y = pos.y.toFixed(2);			
+							var someTime = (Math.floor(y)+1)*(-1);
+							var d = new Date(x);				
+							var someDay = d.getDate() + 1;
+							var someMonth = d.getMonth() + 1; //months are zero based
+							var someYear = d.getFullYear();				
+							var stringDate = someMonth + "/" + someDay + "/" + someYear + " " + someTime + ":00:00 to " + (someTime+1) + ":00:00";
+                            showTooltip(pos.pageX, pos.pageY,
+                              stringDate);    
+							  }
+							  else
+					$("#tooltip").remove();
+                      
+                });
+					$("#placeholder2").bind("plothover", function (event, pos, item) {   
+                           if(pos){
+                            $("#tooltip").remove();											
+                           var x = Math.floor(pos.x.toFixed(2));
+							var y = pos.y.toFixed(2);			
+							var someTime = (Math.floor(y)+1)*(-1);
+							var d = new Date(x);				
+							var someDay = d.getDate() + 1;
+							var someMonth = d.getMonth() + 1; //months are zero based
+							var someYear = d.getFullYear();				
+							var stringDate = someMonth + "/" + someDay + "/" + someYear + " " + someTime + ":00:00 to " + (someTime+1) + ":00:00";
+                            showTooltip(pos.pageX, pos.pageY,
+                              stringDate);    
+							  }
+							  else
+					$("#tooltip").remove();
+                });
+				$("#placeholder3").bind("plothover", function (event, pos, item) {   
+                           if(pos){
+                            $("#tooltip").remove();											
+                           var x = Math.floor(pos.x.toFixed(2));
+							var y = pos.y.toFixed(2);			
+							var someTime = (Math.floor(y)+1)*(-1);
+							var d = new Date(x);				
+							var someDay = d.getDate() + 1;
+							var someMonth = d.getMonth() + 1; //months are zero based
+							var someYear = d.getFullYear();				
+							var stringDate = someMonth + "/" + someDay + "/" + someYear + " " + someTime + ":00:00 to " + (someTime+1) + ":00:00";
+                            showTooltip(pos.pageX, pos.pageY,
+                              stringDate);    
+							  }
+							  else
+					$("#tooltip").remove();
+                });
+				
+			
+				
+		});
+	 </script>
+	 <style >
+/* Reset body padding and margins */
+body { margin:0; padding:0; }
+ 
+/* Make Header Sticky */
+#header_container { background:#eee; border:1px solid #666; height:80px; left:0; position:fixed; width:100%; top:0;z-index:998}
+#header{ line-height:80px; margin:0 auto; width:100%; text-align:center; z-index:999}
+ 
+/* CSS for the content of page. I am giving top and bottom padding of 80px to make sure the header and footer do not overlap the content.*/
+#container { margin:0 auto; overflow:auto; padding-bottom:150px; padding-top:80px; width:100%; }
+#content{}
+ 
+/* Make Footer Sticky */
+#footer_container { background:#eee; background-color:73AFB6; border:1px solid #666; bottom:0; height:150px; left:0; position:fixed; width:100%; }
+#footer { line-height:150px; margin:0 auto; width:100%; text-align:center; }
+
+	</style>
+	 </head>
+	 <body>
+	 <div id="header_container">
+		<div id="header">
+	
+		
+	 <?
+	
+	if(isset($_REQUEST['resid'])&&isset($_SESSION['start_date'])&&isset($_SESSION['end_date'])){
+		//require('../System/dbQuery.php');
+		$resid=$_SESSION['resid'];
+		$title=$_SESSION['resid']." Data";
+	
+	if(!ob_start("ob_gzhandler")) ob_start();
+	
+			$_SESSION['density_start']=date("Y-m-d", strtotime($_SESSION['end_date']." - 18 months"))." 00:00:00";
+			$_SESSION['density_end']=date("Y-m-d", strtotime($_SESSION['end_date']))." 23:59:59";
+	
+	$anticache=rand(0, 10000);	
+	
+	echo "<p><h2>Daily Activity for $resid (".date("M d, Y", strtotime($_SESSION['density_start']))."-".date("M d, Y", strtotime($_SESSION['density_end'])).")</h2></div></div>";
+	/*<a href='density.php?when=after&rand=$anticache'><button type='button'>Add 1 month After</button></a>
+	<a href='density.php?when=before&rand=$anticache'><button type='button'>Add 1 month Before</button></a>
+		</p>";*/
+		?>
+	<div id="container">
+		<div id="content">
+			<div id="Density">
+			
+				<div id='container-placeholder' class="demo-container" style="width:82%;height:300px;margin:20px;">
+					<div id="placeholder" class="demo-placeholder" style="float:left;"></div>
+				</div>
+				<div id='legend' class='demo-container'  style="float:right;width:12%;height:300px;margin:20px;">
+				
+				<? echo "<img src='image.php?what=Density&legend=true' style='float:left'>";?>
+					</div>
+			</div>
+			<div id="Bathroom">
+				
+				<div id='container-placeholder2' class="demo-container" style="width:82%;height:300px;margin:20px;">
+					<div id="placeholder2" class="demo-placeholder" style="float:left;"></div>
+				</div>
+				<div id='legend2' class='demo-container'  style="float:right;width:12%;height:300px;margin:20px;">
+				Bathroom
+				<? echo "<img src='image.php?what=Bathroom&legend=true' style='float:left'>";?>
+				</div>
+			</div>
+			<div id="Rest">
+				
+					<div id='container-placeholder3' class="demo-container" style="width:82%;height:300px;margin:20px;">
+						<div id="placeholder3" class="demo-placeholder" style="float:left;"></div>
+					</div>
+					<div id='legend3' class='demo-container'  style="float:right;width:12%;height:300px;margin:20px;">
+					Hydraulic Restlessness
+					<? echo "<img src='image.php?what=Restlessness(Hydraulic)&legend=true' style='float:left'>";?>
+					</div>
+			</div>
+		</div>
+	</div>
+	<div id="footer_container">
+		<div id="footer">
+			<div id='container-overview' class="demo-container" style="width:97%;margin:20px;" >
+				<div id="overview" class="demo-placeholder"></div>
+			</div>
+		</div>
+	</div>
+<?
+$what=array();
+	
+	array_push($what, 'Density');
+
+	echo "</body>";
+	echo "</html>";	
+	ob_end_flush();
+//}
+}
+else
+	echo "no resid set ".$_SESSION['resid']." ".$_SESSION['start_date']." ".$_SESSION['end_date']." ";
+?>

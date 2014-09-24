@@ -1,0 +1,494 @@
+<!doctype html>
+
+<head>
+<title>Gait Interface Demo</title>
+
+<link href="css/jquery-ui.css" rel="stylesheet" />
+<link href="/tabs.css" rel="stylesheet" />
+
+<style>
+    .tickLabel { font-size: 80% }
+    #chart {
+        height: 335px;
+        width: 640px;
+    }
+    #chartLegend .legendLabel { padding-right:100px; }
+</style>
+
+<!-- ======================== -->
+<!-- External libraries...    -->
+<!-- ======================== -->
+<script src="js/jquery-1.8.2.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/jquery.flot.min.js"></script>
+<script src="js/jquery.flot.rangeselection.js"></script>
+<script src="js/jquery.flot.threshold.multiple.js"></script>
+<script src="js/jquery.csv-0.71.min.js"></script>
+
+<!-- ======================== -->
+<!-- Our source code...       -->
+<!-- ======================== -->
+<script src="js/gait.globals.js"></script>
+<script src="js/gait.util.js"></script>
+<script src="js/gait.rid_sid_init_load.js"></script>
+<script src="js/gait.load_gait_data.js"></script>
+<script src="js/gait.gait_alerts.js"></script>
+<script src="js/gait.parameter_risk_plot.js"></script>
+<script src="js/gait.model_init.js"></script>
+<script src="js/gait.model_modify.js"></script>
+
+<script>
+
+    //-----------------------------------------------
+    // Document load....
+    //-----------------------------------------------
+    $(document).ready(function() {
+       
+        //---------------------------------------------
+        // Load list of all user IDS
+        //---------------------------------------------
+        load_rid_sid();
+        load_initializations();
+        swin_select.disabled =true;
+    
+        //----------------------------------------------
+        // Pop menus
+        //----------------------------------------------
+        popDropDown('idselect0', id_text);
+        popDropDown('idselect1', id_text);
+        popDropDown('idselect2', id_text);
+        
+        popDropDown('mwselect0', mw_text);
+        popDropDown('mwselect1', mw_text);
+        popDropDown('mwselect2', mw_text);
+        
+        popDropDown('dwselect0', dw_text);
+        popDropDown('dwselect1', dw_text);
+        popDropDown('dwselect2', dw_text);
+        
+        popDropDown('sid_select', sid_text);
+        popDropDown('swin_select', swin_text);
+        
+        
+        //---------------------------------------------
+        // Selection and hover/click callbacks
+        //---------------------------------------------
+        $('#idselect0').on('change', function(event, ui) {updateInputs(event.target.id);});
+        $('#idselect1').on('change', function(event, ui) {updateInputs(event.target.id);});
+        $('#idselect2').on('change', function(event, ui) {updateInputs(event.target.id);});
+        
+        $('#mwselect0').on('change', function(event, ui) {updateInputs(event.target.id);});
+        $('#mwselect1').on('change', function(event, ui) {updateInputs(event.target.id);});
+        $('#mwselect2').on('change', function(event, ui) {updateInputs(event.target.id);});
+        
+        $('#dwselect0').on('change', function(event, ui) {updateInputs(event.target.id);});
+        $('#dwselect1').on('change', function(event, ui) {updateInputs(event.target.id);});
+        $('#dwselect2').on('change', function(event, ui) {updateInputs(event.target.id);});
+        
+        $("#flot1").bind("plothover", function(event, pos, item){ hoverUpdate(event, pos, item);} );
+        $("#flot2").bind("plothover", function(event, pos, item){ hoverUpdate(event, pos, item);} );
+        
+        $("#flotSid1").bind("plotclick", function (event, pos, item) { sidClickUpdate(event, pos, item);} );
+        $("#flotSid2").bind("plotclick", function (event, pos, item) { sidClickUpdate(event, pos, item);} );
+        $("#flotSid3").bind("plotclick", function (event, pos, item) { sidClickUpdate(event, pos, item);} );
+        
+        $("#flotM1").bind("plotclick", function (event, pos, item) { modelClickUpdate(event, pos, item);} );
+        $("#flotM2").bind("plotclick", function (event, pos, item) { modelClickUpdate(event, pos, item);} );
+        $("#flotM3").bind("plotclick", function (event, pos, item) { modelClickUpdate(event, pos, item);} );
+        
+        
+        //------------------------------------
+        // Label colors...
+        //------------------------------------
+        hc_label.style.color = pcolors[0];
+        stc_label.style.color = pcolors[1];
+        slc_label.style.color = pcolors[2];
+        asc_label.style.color = pcolors[3];
+    });
+    
+    //-----------------------------------------------
+    // Tab switch callback..
+    //-----------------------------------------------
+    $(function() {
+        $("#tabs").tabs({
+            activate: function(event, ui) {
+                var index = ui.newTab.index();
+                if(index === 1){
+                    //Switching to tab 1
+                }
+                else if(index === 0){
+                    //Switching to tab 0
+                    if( c_id > 0){
+                        plotParamData();  //Update plot on tab switch...
+                    }
+                }               
+                else if(index === 2){
+                    //Switching to tab 2
+                    if( c_id > 0 ){
+                        plotFallRiskData();
+                    }
+                }
+                else if(index === 3){
+                    
+                
+                }
+            }
+        });
+    });
+    
+    //-----------------------------------------
+    // Handles changes in ID/window sizes..
+    //-----------------------------------------
+    function updateInputs(id){
+        
+        //--------------------------------
+        // Save current state incase
+        //--------------------------------
+        o_id = c_id;   
+        o_mw = c_mw;
+        o_dw = c_dw;
+        o_dE = dEnd;
+        o_mt = mw_text;
+        o_dt = dw_text;
+        
+        //----------------------------------------------
+        // Determine which tab had the change..
+        //----------------------------------------------
+        var idu, mwu, dwu;
+        var doPlot1 = 0; var doPlot2 = 0;
+        if( id === "idselect0" || id === "mwselect0" || id === "dwselect0"){
+            idu = document.getElementById("idselect0");
+            mwu = document.getElementById("mwselect0");
+            dwu = document.getElementById("dwselect0");
+            doPlot1 = 1;
+        }
+        else if( id === "idselect1" || id === "mwselect1" || id === "dwselect1"){
+            idu = document.getElementById("idselect1");
+            mwu = document.getElementById("mwselect1");
+            dwu = document.getElementById("dwselect1");
+        }
+        else if( id === "idselect2" || id === "mwselect2" || id === "dwselect2"){
+            idu = document.getElementById("idselect2");
+            mwu = document.getElementById("mwselect2");
+            dwu = document.getElementById("dwselect2");
+            doPlot2 = 1;
+        }
+       
+        var usv = 0;
+        if( idu.selectedIndex !== c_id ){
+            if( idu.selectedIndex > 0){
+                usv = 1;    //Update model slider value...
+                dEnd = 0;   //Update date if ID changes...
+            }
+            else{
+                //Don't allow selection of no user...
+                idu.selectedIndex = c_id;
+                return;
+            }
+        }
+        else if(c_id === 0){
+            return;  //No active user, so nothing to do... 
+        }    
+       
+        //--------------------------------------------
+        // Try to load desired data and update stuff..
+        //--------------------------------------------
+        c_id = idu.selectedIndex;
+        c_mw = mwu.selectedIndex;
+        c_dw = dwu.selectedIndex;
+
+        var lres = load_gait_data();  
+        if( lres === 0){
+            //Failure, restore...
+            alert("No data found for system " + id_text[c_id] + " with mWs = " + mw_text[c_mw] + " and gWs = " + dw_text[c_dw] + "!");
+            c_id = o_id;    
+            c_mw = o_mw;
+            c_dw = o_dw;
+            dEnd = o_dE;
+            idu.selectedIndex = c_id;
+            mwu.selectedIndex = c_mw;
+            dwu.selectedIndex = c_dw;
+            dw_text = o_dt;
+            mw_text = o_mt;
+        }
+        
+        run_gait_alerts();
+    
+        //--------------------------------------
+        // Success
+        //--------------------------------------
+        idselect0.selectedIndex = c_id;
+        mwselect0.selectedIndex = c_mw;
+        mwselect0.disabled = false;
+        dwselect0.selectedIndex = c_dw;
+        dwselect0.disabled = false;
+
+        idselect1.selectedIndex = c_id;
+        mwselect1.selectedIndex = c_mw;
+        mwselect1.disabled = false;
+        dwselect1.selectedIndex = c_dw;
+
+        idselect2.selectedIndex = c_id;
+        mwselect2.selectedIndex = c_mw;
+        mwselect2.disabled = false;
+        dwselect2.selectedIndex = c_dw;
+        dwselect2.disabled = false;
+        
+        raw_update.disabled = true;
+        raw_enable.innerHTML = "Enabled Modification";
+        raw_enable.disabled = false;
+
+        updateModelSlider(usv);
+        updateModelImage(modelslider.value);
+
+        if( doPlot1){
+            plotParamData();
+        }
+        if(doPlot2){
+            plotFallRiskData();
+        }      
+    };
+    
+    //----------------------------------------
+    // Handles updating model slider range and
+    //    displayed model image...
+    //----------------------------------------
+
+    function updateModelSlider(usv){
+        //Updates the date range and value of slider
+        modelslider.min = dStart;
+        modelslider.max = dEnd;
+        modelslider.step = msecDay;
+        lastSliderValue = -1;
+        if( usv > 0){
+            modelslider.value = mDate;
+        }
+    };
+    
+    function updateModelImage(value){
+
+        var sliderDate = new Date(parseInt(value));
+
+        //-------------------------------------------
+        // Load most recent model  to eD
+        //-------------------------------------------
+        $.ajax({
+           type: "POST",
+           url: "php/modelQuery.php",
+           data:{sid: sid_options[c_id], mws: mw_options[c_mw], modeldate: sliderDate.toJSON() },
+           async:   false,
+           success:function(data){
+                 modelDataString = data;   
+           },
+           error: function (res){ alert("Error loading model data!");  }
+        });
+
+
+        modelDataString = jQuery.parseJSON(modelDataString);
+        if( modelDataString.length === 0){
+            return;
+        }
+        
+      
+        mParams = modelDataString[0][1].split(/\[|,| |;|\]/);
+
+        plotModelImages();
+       
+    };
+      
+</script>
+
+<style>
+textarea {
+width:100%;
+}
+</style>
+</head>
+
+<body>
+  <div class="tabBox" style="clear:both;">
+    <div class="tabArea">
+      <a class="tab" href="/index.php">Home</a>
+      <a class="tab" href="/health/index.php">Health</a>
+      <a class="tab" href="/health/density2.php?resid=3004">Density</a>
+      <a class="tab" href="/gait/index.html">Gait</a>
+      <a class="tab" href="/rewind/index.php">Rewind</a>
+	   <a class="tab" href="/floorplan/index.php?resid=3004">Floorplan</a>
+    </div>
+    <div class="tabMain">
+<div id=tabs style="min-width:1200px;">
+  <ul>
+    <li><a href="#tabs-0">Gait Parameter Estimates</a></li>
+    <li><a href="#tabs-1">Raw Data</a></li>
+    <li><a href="#tabs-2">Fall Risk Estimate</a></li>
+    <li><a href="#tabs-3">Model Initialization</a></li>
+  </ul>
+    
+    
+  <div id=tabs-0 style="min-width:1200px;">
+    <h2>Gait Parameter Graphs</h2>
+    <label for="idselect0" id=ids0_label >User ID: </label>
+    <select id=idselect0 name="param" style="margin-right: 40px;"></select>
+    <label for="mwselect0" id=mws0_label>model window size: </label>
+    <select id=mwselect0 name="param" disabled style="margin-right: 40px;"></select>
+    <label for="dwselect0" id=dws0_label>data window size: </label>
+    <select id=dwselect0 name="param" disabled ></select>
+    <br>
+    <div id="legend00" style="display: inline-block; vertical-align: top; margin-right:10px; margin-top:25px; body{float:left}; 
+         background-color: #ffffff; padding: 10px; border-radius:15px; border-style:solid; border-width:1px;">
+        <label for="height_check" id=hc_label>height (in)</label>
+        <input type="checkbox" id=height_check checked style="float: right" onClick="cbChanged();"><br>
+        
+        <label for="sl_check" id=slc_label>stride length (cm)</label>
+        <input type="checkbox" id=sl_check checked style="float: right" onClick="cbChanged();"><br>
+        
+        <label for="as_check" id=asc_label>average speed (cm/sec)</label>
+        <input type="checkbox" id=as_check checked style="float: right" onClick="cbChanged();"><br>     
+        
+        <div style="margin-top: 35px;">
+        <label  style="font-size: 14px">draw mean </label><br>
+        <label for="drawlines" style="font-size: 14px; margin-left: 20px;">lines: </label>
+        <input type="checkbox" id="drawlines" checked style="float: right;" onClick="cbChanged();"><br>
+        <label for="drawpoints" style="font-size: 14px; margin-left: 20px;">points: </label>
+        <input type="checkbox" id="drawpoints" style="float: right" onClick="cbChanged();">         
+        </div>
+        
+        <div style="margin-top: 25px;">
+        <label for="conf_check" style="font-size: 14px">draw 95% intervals: </label>
+        <input type="checkbox" id="conf_check" style="float: right" onClick="cbChanged();"> <br>
+        </div>
+        
+        <div style="margin-top: 25px;">
+        <label for="alert_check" style="font-size: 14px">draw gait alerts: </label>
+        <input type="checkbox" id="alert_check" style="float: right" onClick="cbChanged();"> <br>
+        </div>
+    </div>
+    <div id="chart" style="display: inline-block;  margin-right:10px;  margin-top:25px;
+         background-color: #ffffff; padding: 10px; border-radius:15px; border-style:solid; border-width:1px;
+         width:660px; height: 355px;">
+        <div id=flot1 style="width:640px;height:300px;margin:0 auto;"></div>
+        <div id=smallgraph style="width:640px;height:35px;margin:0 auto;"></div>
+        <!-- <p style="margin-left: 15px;  font-size: 16px;">** Shading on graph indicates system offline</p> -->
+    </div>
+    <div id="legend01" style="display: inline-block; vertical-align: top; body{float:left}; margin-top:25px;
+         background-color: #ffffff; padding: 10px; border-radius:15px; border-style:solid; border-width:1px;" >
+
+        <input type="checkbox" id=st_check checked style="float: left" onClick="cbChanged();">    
+        <label for="st_check" id=stc_label>stride time (sec)</label>
+        
+    </div>
+    <br>
+    <a href="basic.html" style="font-size: 12pt; display: inline-block; margin-top: 50px;">Link to basic interface</a> 
+  </div>
+    
+    
+    
+  <div id=tabs-1 style="min-width:1200px;">
+    <h2>Walk Data Scatter Plots and Model(s)</h2>
+    <label for="idselect1" id=ids1_label >User ID: </label>
+    <select id=idselect1 name="model" style="margin-right: 40px;"></select>
+    <label for="mwselect1" id=mws1_label>model window size: </label>
+    <select id=mwselect1 name="model" disabled style="margin-right: 40px;"></select>
+    <select id=dwselect1 name="model" disabled hidden></select>
+    <br>
+    <div style="width: 325px; height: 35px; display: inline-block; margin-top:50px; margin-right: 5px; text-align:center; font-size: 12pt;">Speed (cm/sec) vs. Height (cm)</div>
+    <div style="width: 325px; height: 35px; display: inline-block; margin-top:50px; margin-right: 5px; text-align:center; font-size: 12pt;">Stride Length (cm) vs. Height (cm)</div>
+    <div style="width: 325px; height: 35px; display: inline-block; margin-top:50px; margin-right: 5px; text-align:center; font-size: 12pt;">Stride Time (sec) vs. Height (cm)</div>
+    <br>
+    <div id=flotM1 style="width: 325px; height: 282px; display: inline-block; margin-top:-2px; margin-right: 5px; background-color:white;"></div>
+    <div id=flotM2 style="width: 325px; height: 282px; display: inline-block; margin-top:-2px; margin-right: 5px; background-color:white;"></div>
+    <div id=flotM3 style="width: 325px; height: 282px; display: inline-block; margin-top:-2px; margin-right: 5px; background-color:white;"></div>
+    <br>
+    <input type="range" id=modelslider style="width: 325px; margin-left: 332px; margin-top: 15px;" 
+           min="0" max="1" value="0.5" step="0.1" onchange="updateModelImage(this.value)" hidden/>
+    <br>
+    <label id=rwin_date_label style="margin-left: 337px;"> </label>
+    <br>
+    <div>
+    <button id=raw_enable style="font-size: 12pt; display: inline-block; margin-top: 20px; margin-left: 20px; margin-right: 10px;" onClick="modelEnableUpdate()">Enable Modification</button>
+    <button id=raw_update style="font-size: 12pt; display: inline-block; margin-top: 20px; margin-right: 50px;" disabled onClick="modelUpdate()">Modify</button>
+    </div>
+    <br>
+    <a href="basic.html" style="font-size: 12pt; display: inline-block; margin-top: 50px;">Link to basic interface</a> 
+  </div>
+    
+    
+    
+   <div id=tabs-2 style="min-width:1200px;">
+    <h2>Estimated TUG Time</h2>
+    <label for="idselect2" id=ids2_label >User ID: </label>
+    <select id=idselect2 name="risk" style="margin-right: 40px;"></select>
+    <label for="mwselect2" id=mws2_label >model window size: </label>
+    <select id=mwselect2 name="risk" disabled style="margin-right: 40px;"></select>
+    <label for="dwselect2" id=dws2_label>data window size: </label>
+    <select id=dwselect2 name="risk" disabled></select>
+    <br>
+    <div id="legend20" style="display: inline-block; vertical-align: top; margin-right:10px; margin-top:25px; body{float:left}; 
+         background-color: #ffffff; padding: 10px; border-radius:15px; border-style:solid; border-width:1px;">
+  
+        <label for="drawlines2" style="font-size: 14px">draw line: </label>
+        <input type="checkbox" id="drawlines2" checked style="float: right;" onClick="cbChanged2();"><br>
+        
+        <label for="drawpoints2" style="font-size: 14px">draw point: </label>
+        <input type="checkbox" id="drawpoints2" style="float: right" onClick="cbChanged2();"> 
+        
+        <div style="margin-top: 25px;">
+        <label for="conf_check2" style="font-size: 14px">draw 95% intervals: </label>
+        <input type="checkbox" id="conf_check2" style="float: right" onClick="cbChanged2();"> <br>
+        </div>
+        
+        <div style="margin-top: 25px;">
+        <label for="alert_check2" style="font-size: 14px">draw gait alerts: </label>
+        <input type="checkbox" id="alert_check2" style="float: right" onClick="cbChanged2();"> <br>
+        </div>
+        
+    </div>
+    <div id="chart2" style="display: inline-block;  margin-right:10px;  margin-top:25px;
+         background-color: #ffffff; padding: 10px; border-radius:15px; border-style:solid; border-width:1px;
+         width:660px; height: 355px;">
+        <div id=flot2 style="width:640px;height:300px;margin:0 auto;"></div>
+        <div id=smallgraph2 style="width:640px;height:35px;margin:0 auto;"></div>
+        <!-- <p style="margin-left: 15px; font-size: 16px;">** Shading on graph indicates system offline</p> -->
+    </div>
+    <br>
+    <a href="basic.html" style="font-size: 12pt; display: inline-block; margin-top: 50px;">Link to basic interface</a> 
+  </div>
+    
+    
+  <div id=tabs-3 style="min-width:1200px;">
+    <h2>Model Initialization</h2>
+    <label for="sid_select"  >SID: </label>
+    <select id=sid_select name="model" style="margin-right: 40px;" onchange="onInitChange()"></select>
+    <label id=init_K_label style="margin-right: 50px;">Residents: --</label>  
+    <label for="swin_select" >Data window size, first: </label>
+    <select id=swin_select name="model" style="margin-right: 40px;" onchange="onInitChange()"></select>
+    <label id=swin_dates_label > </label>
+    <br>
+    <label id=init_label style="display: inline-block; margin-top: 25px;">Current:</label>
+    <label id=new_init_label style="display: inline-block; margin-top: 25px; margin-left: 50px;">New: (click on graphs)</label>
+    <br>
+    <br>
+    <div style="width: 325px; height: 35px; display: inline-block; margin-top:5px; margin-right: 5px; text-align:center; font-size: 12pt;">Speed (in/sec) vs. Height (in)</div>
+    <div style="width: 325px; height: 35px; display: inline-block; margin-top:5px; margin-right: 5px; text-align:center; font-size: 12pt;">Stride Length (in) vs. Height (in)</div>
+    <div style="width: 325px; height: 35px; display: inline-block; margin-top:5px; margin-right: 5px; text-align:center; font-size: 12pt;">Stride Time (sec) vs. Height (in)</div>
+    <br>
+    <div id=flotSid1 style="width: 325px; height: 282px; display: inline-block; margin-top:-2px; margin-right: 5px; background-color:white;"></div>
+    <div id=flotSid2 style="width: 325px; height: 282px; display: inline-block; margin-top:-2px; margin-right: 5px; background-color:white;"></div>
+    <div id=flotSid3 style="width: 325px; height: 282px; display: inline-block; margin-top:-2px; margin-right: 5px; background-color:white;"></div>
+    <br>
+    <button id=sid_enable style="font-size: 12pt; display: inline-block; margin-top: 20px; margin-left: 20px; margin-right: 10px;" disabled onClick="initEnableUpdate()">Enable Updating</button>
+    <button id=sid_update style="font-size: 12pt; display: inline-block; margin-top: 20px; margin-right: 50px;" disabled onClick="initUpdate()">Update</button>
+    <label>Resident to modify:</label>
+    <select id=update_res_select name="model" style="margin-right: 40px;" disabled></select>
+    <br>
+    <a href="basic.html" style="font-size: 12pt; display: inline-block; margin-top: 50px;">Link to basic interface</a> 
+  </div>
+    
+    
+    
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

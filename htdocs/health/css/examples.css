@@ -1,0 +1,603 @@
+* {	padding: 0; margin: 0; vertical-align: top; }
+
+body {
+  font: 18px/1.5em "proxima-nova", Helvetica, Arial, sans-serif;
+  background-color:#d7ebf9;
+  height: 100%;
+  width: 100%;
+}
+
+a {	color: #069; }
+a:hover { color: #28b; }
+
+h2 {
+  text-align: center;
+  font: normal 40px "omnes-pro", Helvetica, Arial, sans-serif;
+  font-weight:bold;
+}
+
+h3 {
+  margin-left: 30px;
+  font: normal 26px "omnes-pro", Helvetica, Arial, sans-serif;
+  color: #666;
+}
+
+p {
+  margin-top: 10px;
+}
+
+button {
+  font-size: 18px;
+  padding: 1px 7px;
+}
+
+input {
+  font-size: 18px;
+}
+
+input[type=checkbox] {
+  margin: 7px;
+}
+
+#header {
+  position: relative;
+  width: 900px;
+  margin: auto;
+}
+
+#header h2 {
+  margin-left: 10px;
+  vertical-align: middle;
+  font-size: 42px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #000;
+}
+
+#content {
+  width: 100%;
+  height:100%;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+#footer {
+  margin-top: 25px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+}
+
+.demo-container {
+  box-sizing: border-box;
+  width: 75%;	
+  float:left;
+  padding: 15px;
+  margin: 15px;
+  border: 1px solid gray;
+  background: #fff;
+  background: linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+.pages {
+  -moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+  -webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+  box-shadow:inset 0px 1px 0px 0px #ffffff;
+  background-color:#f6f6f6;
+  -webkit-border-top-left-radius:6px;
+  -moz-border-radius-topleft:6px;
+  border-top-left-radius:6px;
+  -webkit-border-top-right-radius:6px;
+  -moz-border-radius-topright:6px;
+  border-top-right-radius:6px;
+  text-indent:0;
+  display:inline-block;
+  color:#777777;
+  font-family:Arial;
+  font-size:12px;
+  font-weight:bold;
+  font-style:normal;
+  height:50px;
+  line-height:50px;
+  text-decoration:none;
+  text-align:center;
+  text-shadow:1px 1px 0px #ffffff;
+}
+
+
+.demo-placeholder {
+  width: 100%;
+  height: 90%;
+  font-size: 14px;
+  line-height: 1.2em;
+}
+
+#overview {
+  width: 100%;
+  height: 100%;
+  font-size: 14px;
+  line-height: 1.2em;
+}
+
+.containerpanel{
+  border:2px solid #111111;
+  padding:8px; 
+  margin:5px;
+  overflow:hidden;
+  border-radius:15px;
+}
+
+
+.legend table {
+  border-spacing: 5px;
+}
+div label input {
+   margin-right:100px;
+}
+
+ .llink:hover{
+	text-decoration:none;
+	
+ }
+ 
+ #tooltip{
+	font-size:16px;
+ }
+ 
+.chk-button {
+    margin:4px;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    float:left;
+}
+
+.chk-button:hover {
+    background:gray;
+}
+
+.chk-button label {
+    float:left;
+    width:4.0em;
+}
+
+.chk-button label span {
+    text-align:center;
+    padding:3px 0px;
+    display:block;
+}
+
+.chk-button label input {
+    position:absolute;
+    top:-200px;
+}
+
+#blue input:checked + span {
+    background-color:blue;
+    color:#fff;
+}
+
+#red input:checked + span {
+    background-color:red;
+    color:#fff;
+  
+}
+#black input:checked + span {
+    background-color:black;
+    color:#fff;
+}
+#navy input:checked + span {
+    background-color:navy;
+    color:#fff;
+}
+.Button-radio {
+    margin:4px;
+    float:left;
+}
+
+.Button-radio label {
+    float:left;
+  width:110px;
+/*	height:100px;*/
+  /*margin:4px;*/
+    background-color:white;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    color:black;
+}
+
+.Button-radio label span {
+    text-align:center;
+    padding:13px 0px;
+    display:block;
+}
+
+.Button-radio label input {
+    position:absolute;
+    top:-200px;
+}
+
+.Button-radio:hover{
+  color:gray;
+}
+
+.red {
+    margin:4px;
+    background-color:#EFEFEF;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    float:left;
+  width:60px;
+  margin:4px;
+    overflow:auto;
+    color:black;
+  font-size:15px;
+}
+
+.red:hover {
+    background:grey;
+}
+
+.red label {
+    float:left;
+    width:4.0em;
+}
+
+.red label span {
+    text-align:center;
+    padding:3px 0px;
+    display:block;
+}
+
+.red label input {
+    position:absolute;
+    top:-20px;
+}
+
+.red input:checked + span {
+    background-color:black;
+    color:#fff;
+}
+
+.green {
+  float:left;
+  width:80px;
+  margin:4px;
+    background-color:white;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    color:black;
+    background-color:#EFEFEF;
+  font-size:15px;
+}
+
+.green:hover {
+    background:gray;
+}
+
+.green label {
+    float:left;
+    width:4.0em;
+  font-size:15px;
+}
+
+.green label span {
+    text-align:center;
+    padding:3px 0px;
+    display:block;
+}
+
+.green label input {
+    position:absolute;
+    top:-20px;
+}
+
+.green input:checked + span {
+    background-color:black;
+    color:#fff;
+}
+
+#options{
+  float:right;
+  width:22%;
+  height:900px;
+  overflow:none;
+  box-sizing: border-box;
+  padding: 15px;
+  margin-right: 15px;
+  margin-top:15px;
+  border: 1px solid #ddd;
+  background: #fff;
+  background: linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+#container-placeholder1
+{
+float:left;
+height:750px;
+}
+#container-overview
+{
+float:left;
+height:122px;
+}
+@media screen and (min-width:2000px){
+	#tooltip{
+		font-size:36px;
+	}
+}
+@media screen and (max-width:1520px) {
+.Button-radio label {
+    float:left;
+  width:90px;
+/*	height:100px;*/
+  /*margin:4px;*/
+    background-color:white;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    color:black;
+}
+.containerpanel{
+  border:2px solid #111111;
+  padding:5px; 
+  margin:5px;
+  overflow:hidden;
+  border-radius:10px;
+}
+.green {
+  float:left;
+  width:80px;
+  margin:4px;
+    background-color:white;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    color:black;
+    background-color:#EFEFEF;
+  font-size:12px;
+}
+.demo-container {
+  box-sizing: border-box;
+  width: 77%;
+  float:left;
+  padding: 5px;
+  margin: 5px;
+  border: 1px solid #ddd;
+  background: #fff;
+  background: linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+#options{
+  float:right;
+  width:22%;
+  height:880px;
+  overflow:none;
+  box-sizing: border-box;
+  padding: 2px;
+  margin-right: 2px;
+  margin-top:2px;
+  border: 1px solid #ddd;
+  background: #fff;
+  background: linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+}
+@media screen and (max-width:1280px) {
+.red {
+    margin:4px;
+    background-color:#EFEFEF;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    float:left;
+  width:40px;
+  margin:4px;
+    overflow:auto;
+    color:black;
+  font-size:12px;
+}
+
+.Button-radio label {
+    float:left;
+  width:70px;
+/*	height:100px;*/
+  /*margin:4px;*/
+    background-color:white;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    color:black;
+}
+.containerpanel{
+  border:2px solid #111111;
+  padding:2px; 
+  margin:2px;
+  overflow:hidden;
+  border-radius:8px;
+}
+.green {
+  float:left;
+  width:60px;
+  margin:4px;
+    background-color:white;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    color:black;
+    background-color:#EFEFEF;
+  font-size:10px;
+}
+.demo-container {
+  box-sizing: border-box;
+  width: 80%;
+  
+  float:left;
+  padding: 5px;
+  margin: 5px;
+  border: 1px solid #ddd;
+  background: #fff;
+  background: linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+#options{
+  float:right;
+  width:18%;
+  height:747px;
+  overflow:none;
+  box-sizing: border-box;
+  padding: 2px;
+  margin-right: 2px;
+  margin-top:2px;
+  border: 1px solid #ddd;
+  background: #fff;
+  background: linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+  #container-placeholder1
+{
+  float:left;
+  height:625px;
+  }
+  #container-overview
+  {
+    float:left;
+    height:100px;
+  }
+}
+@media only screen 
+and (min-device-width : 320px) 
+and (max-device-width : 568px) 
+and (orientation : landscape) {
+body{font-size:8px}
+#container-placeholder1
+  {
+  float:left;
+  height:200px;
+  }
+  #container-overview
+  {
+    float:left;
+    height:100px;
+  }
+.containerpanel{
+  border:1px solid #111111;
+  padding:1px; 
+  margin:1px;
+  overflow:hidden;
+}
+#options{
+  float:right;
+  width:22%;
+  height:350px;
+  overflow:none;
+  box-sizing: border-box;
+  padding: 2px;
+  margin-right: 2px;
+  margin-top:2px;
+  border: 1px solid #ddd;
+  background: #fff;
+  background: linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+  background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  -o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+.Button-radio label {
+    float:left;
+  width:30px;
+  height:20px;
+  padding:0px;
+  margin:0px;
+  /*margin:4px;*/
+    background-color:white;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    color:black;
+}
+.red {
+    margin:2px;
+    background-color:#EFEFEF;
+    border-radius:0px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    float:left;
+  width:20px;
+    overflow:auto;
+    color:black;
+  font-size:7px;
+}
+.green {
+  float:left;
+  width:20px;
+
+  margin:2px;
+    background-color:white;
+    border-radius:4px;
+    border:1px solid #D0D0D0;
+    overflow:auto;
+    color:black;
+    background-color:#EFEFEF;
+  font-size:7px;
+}
+}
+/* This button was generated using CSSButtonGenerator.com */

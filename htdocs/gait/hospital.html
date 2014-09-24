@@ -1,0 +1,339 @@
+<!doctype html>
+
+<head>
+<title>Gait Interface Demo</title>
+
+<link href="css/jquery-ui.css" rel="stylesheet" />
+
+<style>
+    .tickLabel { font-size: 80% }
+    #chart {
+        height: 335px;
+        width: 640px;
+    }
+    #chartLegend .legendLabel { padding-right:100px; }
+</style>
+
+<!-- ======================== -->
+<!-- External libraries...    -->
+<!-- ======================== -->
+<script src="js/jquery-1.8.2.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/jquery.flot.min.js"></script>
+<script src="js/jquery.flot.rangeselection.js"></script>
+<script src="js/jquery.flot.threshold.multiple.js"></script>
+<script src="js/jquery.csv-0.71.min.js"></script>
+
+<!-- ======================== -->
+<!-- Our source code...       -->
+<!-- ======================== -->
+<script src="js/gait.globals.js"></script>
+<script src="js/gait.util.js"></script>
+<script src="js/gait.rid_sid_init_load.js"></script>
+<script src="js/gait.load_gait_data.js"></script>
+<script src="js/gait.gait_alerts.js"></script>
+<script src="js/gait.parameter_risk_plot.js"></script>
+<script src="js/gait.model_init.js"></script>
+
+<script>
+    
+    //-----------------------------------------------
+    // Document load...
+    //-----------------------------------------------
+    $(document).ready(function() {
+
+
+        //---------------------------------------------
+        // Load list of all user IDS
+        //---------------------------------------------
+        load_rid_sid();
+        load_initializations();
+
+        //---------------------------------------------
+        // Selection and hover callbacks
+        //---------------------------------------------
+        $('#idselect0').on('change', function(event, ui) {updateInputsBasic(event.target.id);});
+        $('#smselect0').on('change', function(event, ui) {updateInputsBasic(event.target.id);});
+        $("#flot1").bind("plothover", function(event, pos, item){ hoverUpdate(event, pos, item);} );
+        $("#flot2").bind("plothover", function(event, pos, item){ hoverUpdate(event, pos, item);} );
+        
+        popDropDown('idselect0', id_text);
+    });
+    
+    //-----------------------------------------------
+    // Will copy stuff when tab is changed
+    //-----------------------------------------------
+    $(function() {
+        $("#tabs").tabs({
+            activate: function(event, ui) {
+            }
+        });
+    });
+    
+    
+    //-----------------------------------------
+    // Handles changes in ID/window sizes..
+    //-----------------------------------------
+    function updateInputsBasic(id){
+        o_id = c_id;   //Save current state incase...
+        o_dE = dEnd;
+        o_sm = c_sm;
+        
+        //----------------------------------------------
+        // Determine which tab had the change..
+        //----------------------------------------------
+        var idu;
+
+        idu = document.getElementById("idselect0");
+       
+        //--------------------------------------------
+        // Try to load desired data and update stuff..
+        //--------------------------------------------
+        if( idu.selectedIndex !== c_id ){
+            if( idu.selectedIndex > 0){
+                dEnd = 0;   //Update date if ID changes...
+            }
+            else{
+                //Don't allow selection of no user...
+                idu.selectedIndex = c_id;
+                return;
+            }
+        }
+        else if(c_id === 0){
+            return;  //No active user, so nothing to do... 
+        }    
+            
+        c_id = idu.selectedIndex;
+
+        var lres = load_gait_data_basic();  
+        if( lres === 0){
+            //c_sm = 0;
+            var lres = load_gait_data_basic(); 
+            if( lres === 0){
+                //Failure, restore...
+                c_id = o_id;    
+                dEnd = o_dE;
+                idu.selectedIndex = c_id;
+            }
+        }
+    
+        //--------------------------------------
+        // Success
+        //--------------------------------------
+        idselect0.selectedIndex = c_id;
+        
+        var frl = document.getElementById("fallRiskLevel");
+        var ash = gaitData[3].length;
+        var cws;
+        do{
+            cws = gaitData[3][ash-1][1];
+            ash = ash - 1;
+        }while( isNaN(cws) );
+        
+        if( cws > 50){
+            frl.innerHTML = "low";
+            frl.style="display: inline-block; background-color: LawnGreen; text-align:center; width: 100px;";
+            frl.style.backgroundColor = "LawnGreen";
+        }
+        else if( cws > 36.5 ){
+            frl.innerHTML = "medium";
+            frl.style="display: inline-block; background-color: yellow; text-align:center; width: 100px;"; 
+            frl.style.backgroundColor = "yellow";
+        }
+        else{
+            frl.innerHTML = "high";
+            frl.style="display: inline-block; background-color: red; text-align:center; width: 100px;";         
+            frl.style.backgroundColor = "red";
+        }
+                
+        plotParamDataBasic();
+        plotFallRiskDataBasic();
+     
+    };
+      
+    //-----------------------------------------
+    // Plots already loaded parameter data...
+    //-----------------------------------------     
+    function plotParamDataBasic(){
+        
+        var newData =[];
+        var minTickSize = Math.ceil((dsEnd - dsStart)/msecDay/7);
+        
+        var con2 = {
+            threshold: 50,
+            color: "rgb(220,220,0)",
+            evaluate : function(y,threshold){ return y <= threshold; }
+	};   
+        var con3 = {
+            threshold: 36.5,
+            color: "rgb(205,0,0)",
+            evaluate : function(y,threshold){ return y <= threshold; }
+	};        
+
+        newData.push( {label: "AIGS (cm/sec)",
+        data: gaitData[3],
+        color: "rgb(0, 205, 0)",
+        constraints: [con3, con2],
+        lines: {show: true, lineWidth: 3},
+        points: { show: true, fill: true, radius: 1 }});           
+  
+
+        newData.push({label: "middle range",
+        data: [[dStart,50], [dEnd,50]],
+        color: "rgba(0, 255, 0, 1)",
+        lines: {lineWidth: 1}}); //, fill: true, fillColor: "rgba(255, 165, 0, 0.25)"} });
+  
+        newData.push({label: "bad range",
+        data: [[dStart,36.5], [dEnd,36.5]], 
+        color: "rgba(255, 0, 0, 1)",
+        lines: {lineWidth: 1}}); //, fill: true, fillColor: "rgba(255, 0, 0, 0.25)"} });
+
+        
+        paramGraph = $.plot($("#flot1"),
+            newData,
+           
+            {       
+                grid: {
+                    color: "#000",
+                    borderWidth: 0,
+                    hoverable: true
+                },
+                
+                xaxis: {
+                    mode: "time",
+                    timeformat: "%m/%d/%y",
+                    minTickSize: [minTickSize,"day"],
+                    ticks: 7,
+                    min: dsStart,
+                    max: dsEnd
+                },
+                yaxes: [{
+                    min:20, 
+                    max: 100, 
+                    tickSize: 10, 
+                    position:"left", 
+                    axisLabel: 'cm/sec',
+                    show: true
+                }],
+                legend: {
+                    show: false
+                }
+            }
+        );
+
+    };
+    
+    
+    //----------------------------------------
+    // Plots estimaed TUG (based as avg spd)
+    //----------------------------------------
+    function plotFallRiskDataBasic(){
+
+        var newData =[];
+        var minTickSize = Math.ceil((dsEnd - dsStart)/msecDay/7);
+
+        var con2 = {
+            threshold: 29.99,
+            color: "rgb(220,220,0)",
+            evaluate : function(y,threshold){ return y <= threshold; }
+	};   
+        var con3 = {
+            threshold: 16.82,
+            color: "rgb(0,205,0)",
+            evaluate : function(y,threshold){ return y <=threshold; }
+	};  
+
+        newData.push( {label: "TUG time (sec)",
+        data: gaitData[11],
+        color: pcolors[2], 
+        constraints: [con3, con2],
+        lines: { show: true, lineWidth: 3 },
+        points: { show: true, fill: true, radius: 1 } 
+        });
+
+        newData.push({label: "",
+        data: [[dStart,16.82], [dEnd,16.82]],
+        color: "rgba(0, 255, 0, 1)",
+        lines: { lineWidth: 1 } });
+
+        newData.push({label: "",
+        data: [[dStart,29.99], [dEnd,29.99]],
+        color: "rgba(255, 0, 0, 1)",
+        lines: { lineWidth: 1 } });
+
+        riskGraph = $.plot($("#flot2"),
+            newData,
+            {       
+                grid: {
+                    color: "#000",
+                    borderWidth: 0,
+                    hoverable: true
+                },
+
+                xaxis: {
+                    mode: "time",
+                    timeformat: "%m/%d/%y",
+                    minTickSize: [minTickSize,"day"],
+                    ticks: 7,
+                    min: dsStart,
+                    max: dsEnd
+                },
+                yaxis: {
+                    min:5, max: 55,  position:"left", tickSize: 5 
+                },
+                legend: {
+                    show: false
+                }
+            }
+        );     
+
+    };
+    
+
+</script>
+
+<style>
+textarea {
+width:100%;
+}
+</style>
+</head>
+
+<body>
+    
+    <div id=tabs style="min-width:685px; width: 685px; max-width: 685px;">  
+
+        <div id=tabs-0 style="min-width:685px; width: 685px; max-width: 685px;">
+            <label for="idselect0" id=ids0_label style="margin-left: 30px;" >User ID: </label>
+            <select id=idselect0 name="param" style="margin-right: 40px;"></select>
+            <label>Current Fall Risk Level: </label>
+            <label id=fallRiskLevel style="display: inline-block; text-align:center; width: 200px;"> </label>
+
+            <br>
+
+            <div id="chart" style="display: inline-block;  margin-right:10px;  margin-top:25px;
+                 background-color: #ffffff; padding: 10px; border-radius:15px; border-style:solid; border-width:1px;
+                 width:660px; height: 350px;">
+                <label style="display: inline-block; margin-left: 235px; margin-top:2px; margin-bottom:20px;">Gait Speed (cm/sec)</label>
+                <br>
+                <div id=flot1 style="width:640px;height:300px;margin:0 auto;"></div>
+            </div>
+            
+            <br>
+            
+            <div id="chart2" style="display: inline-block;  margin-right:10px;  margin-top:25px;
+                background-color: #ffffff; padding: 10px; border-radius:15px; border-style:solid; border-width:1px;
+                width:660px; height: 350px;">
+                <label style="display: inline-block; margin-left: 215px; margin-top:2px; margin-bottom:20px;">Estimated TUG Time (sec)</label>
+                <br>
+               <div id=flot2 style="width:640px;height:300px;margin:0 auto;"></div>
+           </div>
+            
+            
+        </div>
+     
+    </div>
+   
+</body>
+</html>
+
